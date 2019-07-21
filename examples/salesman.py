@@ -2,6 +2,8 @@ from __future__ import print_function
 import math
 import random
 from simanneal import Annealer
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def distance(a, b):
@@ -14,7 +16,6 @@ def distance(a, b):
 
 
 class TravellingSalesmanProblem(Annealer):
-
     """Test annealer with a travelling salesman problem.
     """
 
@@ -33,9 +34,8 @@ class TravellingSalesmanProblem(Annealer):
         """Calculates the length of the route."""
         e = 0
         for i in range(len(self.state)):
-            e += self.distance_matrix[self.state[i-1]][self.state[i]]
+            e += self.distance_matrix[self.state[i - 1]][self.state[i]]
         return e
-
 
 
 if __name__ == '__main__':
@@ -77,12 +77,25 @@ if __name__ == '__main__':
                 distance_matrix[ka][kb] = 0.0
             else:
                 distance_matrix[ka][kb] = distance(va, vb)
+    # print("sssssss")
+    # print(distance_matrix['New York City']['Los Angeles'])  # 2448.8548064148363
 
     tsp = TravellingSalesmanProblem(init_state, distance_matrix)
-    tsp.steps = 100000
+
     # since our state is just a list, slice is the fastest way to copy
     tsp.copy_strategy = "slice"
-    state, e = tsp.anneal()
+    tsp.steps=10000
+    # auto_schedule = tsp.auto(minutes=3, steps=5000)
+    # tsp.set_schedule(auto_schedule)
+    #
+    # assert tsp.Tmax == auto_schedule['tmax']
+    # assert tsp.Tmin == auto_schedule['tmin']
+    # assert tsp.steps == auto_schedule['steps']
+    # assert tsp.updates == auto_schedule['updates']
+
+    state, e, t_list, e_list, step_list = tsp.anneal()
+
+
 
     while state[0] != 'New York City':
         state = state[1:] + state[:1]  # rotate NYC to start
@@ -91,3 +104,27 @@ if __name__ == '__main__':
     print("%i mile route:" % e)
     for city in state:
         print("\t", city)
+
+    dt = 0.01
+    fig, axs = plt.subplots(2, 1)
+    axs[0].plot(step_list, t_list, step_list, e_list)
+    axs[0].set_xlim(0, 10000)
+    axs[0].set_xlabel('step_list')
+    axs[0].set_ylabel('T and E')
+    axs[0].grid(True)
+
+    cxy, f = axs[1].cohere(t_list, e_list, 256, 1. / dt)
+    axs[1].set_ylabel('coherence')
+
+    fig.tight_layout()
+    plt.show()
+
+
+# t = np.arange(0, 30, dt)
+# nse1 = np.random.randn(len(t))                 # white noise 1
+# nse2 = np.random.randn(len(t))                 # white noise 2
+#
+# # Two signals with a coherent part at 10Hz and a random part
+# s1 = np.sin(2 * np.pi * 10 * t) + nse1
+# s2 = np.sin(2 * np.pi * 10 * t) + nse2
+

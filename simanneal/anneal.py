@@ -21,13 +21,12 @@ def round_figures(x, n):
 def time_string(seconds):
     """Returns time in seconds as a string formatted HHHH:MM:SS."""
     s = int(round(seconds))  # round to nearest second
-    h, s = divmod(s, 3600)   # get hours and remainder
-    m, s = divmod(s, 60)     # split remainder into minutes and seconds
+    h, s = divmod(s, 3600)  # get hours and remainder
+    m, s = divmod(s, 60)  # split remainder into minutes and seconds
     return '%4i:%02i:%02i' % (h, m, s)
 
 
 class Annealer(object):
-
     """Performs simulated annealing by calling functions to calculate
     energy and make moves on a state.  The temperature schedule for
     annealing may be provided manually or estimated automatically.
@@ -190,6 +189,8 @@ class Annealer(object):
             self.update(step, T, E, None, None)
 
         # Attempt moves to new states
+        t_list, e_list, step_list, accepts_list, improves_list = [], [], [], [], []
+        k=0
         while step < self.steps and not self.user_exit:
             step += 1
             T = self.Tmax * math.exp(Tfactor * step / self.steps)
@@ -212,17 +213,29 @@ class Annealer(object):
                     self.best_state = self.copy_state(self.state)
                     self.best_energy = E
             if self.updates > 1:
+                k = k + 1
                 if (step // updateWavelength) > ((step - 1) // updateWavelength):
                     self.update(
                         step, T, E, accepts / trials, improves / trials)
                     trials, accepts, improves = 0, 0, 0
+                if k % 100000:
+                    # print('\r%12.5f  %12.2f  %7.2f%%  %7.2f%%  %s  %s\r' %
+                    #       (T, E, step, accepts,
+                    #        improves, trials))
+                    # sys.stderr.flush()
+
+                    t_list.append(T)
+                    e_list.append(E)
+                    step_list.append(step)
+                    accepts_list.append(accepts)
+                    improves_list.append(improves)
 
         self.state = self.copy_state(self.best_state)
         if self.save_state_on_exit:
             self.save_state()
 
         # Return best state and energy
-        return self.best_state, self.best_energy
+        return self.best_state, self.best_energy, t_list, e_list, step_list
 
     def auto(self, minutes, steps=2000):
         """Explores the annealing landscape and

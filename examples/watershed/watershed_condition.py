@@ -48,7 +48,7 @@ def field_by_num(fieldname, fields):
     fnames = [x[0] for x in fields]
     return fnames.index(fieldname) - 1
 
-print "Loading data from shapefile..."
+print("Loading data from shapefile...")
 sf = shapefile.Reader(shp)
 fields = sf.fields
 for rec in sf.records():
@@ -142,7 +142,7 @@ def run(schedule=None):
 
     annealer = Annealer(reserve_energy, reserve_move)
     if schedule is None:
-       print '----\nAutomatically determining optimal temperature schedule'
+       print('----\nAutomatically determining optimal temperature schedule')
        schedule = annealer.auto(state, minutes=6)
 
     try:
@@ -150,16 +150,16 @@ def run(schedule=None):
     except:
         pass # just keep the auto one
 
-    print '---\nAnnealing from %.2f to %.2f over %i steps:' % (schedule['tmax'], 
-            schedule['tmin'], schedule['steps'])
+    print( '---\nAnnealing from %.2f to %.2f over %i steps:' % (schedule['tmax'],
+            schedule['tmin'], schedule['steps']))
 
     state, e = annealer.anneal(state, schedule['tmax'], schedule['tmin'], 
                                schedule['steps'], updates=6)
 
-    print "Reserve cost = %r" % reserve_energy(state)
+    print("Reserve cost = %r" % reserve_energy(state))
     state.sort()
     for watershed in state:
-        print "\t", watershed, watersheds[watershed]
+        print("\t", watershed, watersheds[watershed])
     return state, reserve_energy(state), schedule
 
 if __name__ == "__main__":
@@ -179,13 +179,13 @@ if __name__ == "__main__":
                 freq[w] = 1
 
     print 
-    print "States"
+    print("States")
     for s in states:
-        print s
+        print(s)
     print 
-    print "Frequency of hit (max of %s reps)..." % NUMREPS
+    print("Frequency of hit (max of %s reps)..." % NUMREPS)
     ks = freq.keys()
     ks.sort()
     for k in ks:
         v = freq[k]
-        print k, "#"*int(v), v
+        print(k, "#"*int(v), v)
